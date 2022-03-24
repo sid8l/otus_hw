@@ -19,19 +19,19 @@ func Unpack(sourceString string) (string, error) {
 				multiplier, _ := strconv.Atoi(string(r))
 				resultString.WriteString(strings.Repeat(string(previousLetter), multiplier))
 				isPreviousLetter = false
+				continue
 			} else {
 				return "", ErrInvalidString
 			}
+		}
+		if isPreviousLetter {
+			resultString.WriteRune(previousLetter)
 		} else {
-			if isPreviousLetter {
-				resultString.WriteRune(previousLetter)
-			} else {
-				isPreviousLetter = true
-			}
-			previousLetter = r
-			if i == len(sourceString)-1 {
-				resultString.WriteRune(r)
-			}
+			isPreviousLetter = true
+		}
+		previousLetter = r
+		if i == len(sourceString)-1 {
+			resultString.WriteRune(r)
 		}
 	}
 	return resultString.String(), nil
