@@ -16,6 +16,11 @@ func TestUnpack(t *testing.T) {
 		{input: "abccd", expected: "abccd"},
 		{input: "", expected: ""},
 		{input: "aaa0b", expected: "aab"},
+		{input: "a", expected: "a"},
+		{input: "a0", expected: ""},
+		{input: "a4bc2d5e3", expected: "aaaabccdddddeee"},
+		{input: "\n2\n3a4", expected: "\n\n\n\n\naaaa"},
+		{input: "а2б0福3ヅ4ヅ0", expected: "аа福福福ヅヅヅヅ"},
 		// uncomment if task with asterisk completed
 		// {input: `qwe\4\5`, expected: `qwe45`},
 		// {input: `qwe\45`, expected: `qwe44444`},
@@ -34,7 +39,7 @@ func TestUnpack(t *testing.T) {
 }
 
 func TestUnpackInvalidString(t *testing.T) {
-	invalidStrings := []string{"3abc", "45", "aaa10b"}
+	invalidStrings := []string{"3abc", "45", "aaa10b", "abc33", "a33bcd2"}
 	for _, tc := range invalidStrings {
 		tc := tc
 		t.Run(tc, func(t *testing.T) {
