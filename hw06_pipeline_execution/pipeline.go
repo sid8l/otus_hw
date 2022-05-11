@@ -28,12 +28,9 @@ func DoneChecker(done In, in In) Out {
 }
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-	interim := in
-	outStage := make(Out)
 	for _, stage := range stages {
-		outStage = stage(interim)
-		interim = outStage
+		in = stage(in)
 	}
-	outPrime := DoneChecker(done, outStage)
+	outPrime := DoneChecker(done, in)
 	return outPrime
 }
