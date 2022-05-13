@@ -90,4 +90,50 @@ func TestPipeline(t *testing.T) {
 		require.Len(t, result, 0)
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
 	})
+
+	t.Run("no stages", func(t *testing.T) {
+		in := make(Bi)
+		done := make(Bi)
+		data := []int{1, 2, 3, 4, 5}
+		go func() {
+			for _, v := range data {
+				in <- v
+			}
+			close(in)
+		}()
+
+		result := make([]int, 0, 5)
+		for s := range ExecutePipeline(in, done) {
+			result = append(result, s.(int))
+		}
+
+		require.Equal(t, []int{1, 2, 3, 4, 5}, result)
+	})
+}
+
+func TestDoneChecker(t *testing.T) {
+	t.Run("simple tests", func(t *testing.T) {
+		var result []int
+		in := make(chan interface{})
+		done := make(chan interface{})
+		out := DoneChecker(done, in)
+
+		in <- 1
+		val, ok := <-out
+		result = append(result, val.(int))
+		require.True(t, ok)
+		require.Equal(t, []int{1}, result)
+
+		in <- 2
+		val, ok = <-out
+		result = append(result, val.(int))
+		require.True(t, ok)
+		require.Equal(t, []int{1, 2}, result)
+
+		close(done)
+		val, ok = <-out
+		require.False(t, ok)
+		require.Nil(t, val)
+	})
+
 }
