@@ -22,5 +22,4 @@ func main() {
 	if err := Copy(from, to, offset, limit); err != nil {
 		fmt.Println(err)
 	}
-
 }
