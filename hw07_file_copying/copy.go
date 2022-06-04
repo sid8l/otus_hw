@@ -5,13 +5,12 @@ import (
 	"io"
 	"os"
 
-	"github.com/cheggaaa/pb/v3"
+	pb "github.com/cheggaaa/pb/v3"
 )
 
 var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
-	ErrUnlimitedDevFiles     = errors.New("can't copy from pseudo-device without limit")
 )
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
@@ -35,11 +34,6 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 
 	srcReader := io.Reader(src)
-
-	// pseudo-device without limit (e.g. /dev/urandom)
-	if limit == 0 && srcSize == 0 {
-		return ErrUnlimitedDevFiles
-	}
 
 	if limit == 0 {
 		limit = srcSize

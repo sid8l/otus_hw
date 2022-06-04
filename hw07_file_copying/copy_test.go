@@ -21,11 +21,16 @@ func TestCopy(t *testing.T) {
 	}()
 
 	t.Run("positive tests", func(t *testing.T) {
-		src.WriteString("Hello World!")
-
 		err := Copy(src.Name(), dst.Name(), 0, 0)
 		require.Nil(t, err)
 		dstText, _ := ioutil.ReadAll(dst)
+		require.Equal(t, []byte(""), dstText)
+
+		src.WriteString("Hello World!")
+
+		err = Copy(src.Name(), dst.Name(), 0, 0)
+		require.Nil(t, err)
+		dstText, _ = ioutil.ReadAll(dst)
 		require.Equal(t, []byte("Hello World!"), dstText)
 
 		err = Copy(src.Name(), dst.Name(), 6, 0)
@@ -65,8 +70,5 @@ func TestCopy(t *testing.T) {
 		fakePath, _ := filepath.Abs("abracadabra")
 		err = Copy(fakePath, dst.Name(), 0, 0)
 		require.ErrorIs(t, err, ErrUnsupportedFile)
-
-		err = Copy("/dev/urandom", dst.Name(), 0, 0)
-		require.ErrorIs(t, err, ErrUnlimitedDevFiles)
 	})
 }
