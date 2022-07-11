@@ -17,6 +17,7 @@ type EnvValue struct {
 
 func ReadFile(file string) (EnvValue, error) {
 	f, err := os.Open(file)
+	defer f.Close()
 	if err != nil {
 		return EnvValue{Value: "", NeedRemove: false}, err
 	}
