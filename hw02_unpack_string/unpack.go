@@ -22,7 +22,7 @@ func Unpack(inputString string) (string, error) {
 			continue
 		}
 		if ra[i] == shielding {
-			if i != len(ra) && !unicode.IsDigit(ra[i+1]) && ra[i+1] != shielding {
+			if i != len(ra)-1 && !unicode.IsDigit(ra[i+1]) && ra[i+1] != shielding {
 				return "", ErrInvalidString
 			} else if !isCharacterEscaped {
 				isCharacterEscaped = true
@@ -40,6 +40,9 @@ func Unpack(inputString string) (string, error) {
 			resultString.WriteRune(ra[i])
 		}
 		isCharacterEscaped = false
+	}
+	if isCharacterEscaped {
+		return "", ErrInvalidString
 	}
 	return resultString.String(), nil
 }
