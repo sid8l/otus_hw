@@ -41,5 +41,8 @@ func Unpack(inputString string) (string, error) {
 		}
 		isCharacterEscaped = false
 	}
+	if isCharacterEscaped {
+		return "", ErrInvalidString
+	}
 	return resultString.String(), nil
 }
