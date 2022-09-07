@@ -14,8 +14,7 @@ type wordCount struct {
 var re = regexp.MustCompile(`[a-zA-Zа-яА-Я]+(-*[a-zA-Zа-яА-Я]+)*`)
 
 func Top10(s string) []string {
-	var result []string
-	var wordCountArr []wordCount
+	result := make([]string, 0, 10)
 	wordsCount := map[string]int{}
 	words := re.FindAllString(s, -1)
 	if len(words) == 0 {
@@ -25,6 +24,7 @@ func Top10(s string) []string {
 		wordsCount[strings.ToLower(words[i])]++
 	}
 
+	wordCountArr := make([]wordCount, 0, len(wordsCount))
 	for key, value := range wordsCount {
 		wordCountArr = append(wordCountArr, wordCount{word: key, count: value})
 	}
@@ -32,9 +32,8 @@ func Top10(s string) []string {
 	sort.Slice(wordCountArr, func(i, j int) bool {
 		if wordCountArr[i].count == wordCountArr[j].count {
 			return wordCountArr[i].word < wordCountArr[j].word
-		} else {
-			return wordCountArr[i].count > wordCountArr[j].count
 		}
+		return wordCountArr[i].count > wordCountArr[j].count
 	})
 
 	for i, val := range wordCountArr {
