@@ -10,6 +10,56 @@ import (
 )
 
 func TestCopy(t *testing.T) {
+	tests := map[string]struct {
+		offset       int64
+		limit        int64
+		sourceString string
+		result       []byte
+	}{
+		"empty file": {
+			offset:       0,
+			limit:        0,
+			sourceString: "",
+			result:       []byte(""),
+		},
+		"without limit and offset": {
+			offset:       0,
+			limit:        0,
+			sourceString: "Hello World!",
+			result:       []byte("Hello World!"),
+		},
+		"with offset": {
+			offset:       6,
+			limit:        0,
+			sourceString: "Hello World!",
+			result:       []byte("World!"),
+		},
+		"with limit": {
+			offset:       0,
+			limit:        5,
+			sourceString: "Hello World!",
+			result:       []byte("Hello"),
+		},
+		"with offset and limit": {
+			offset:       3,
+			limit:        5,
+			sourceString: "Hello World!",
+			result:       []byte("lo Wo"),
+		},
+		"limit > file size": {
+			offset:       0,
+			limit:        1000,
+			sourceString: "Hello World!",
+			result:       []byte("Hello World!"),
+		},
+		"with offset and limit > file size": {
+			offset:       6,
+			limit:        1000,
+			sourceString: "Hello World!",
+			result:       []byte("World!"),
+		},
+	}
+
 	src, _ := os.CreateTemp("", "src")
 	dst, _ := os.CreateTemp("", "dst")
 	defer func() {
@@ -19,44 +69,22 @@ func TestCopy(t *testing.T) {
 		dst.Close()
 	}()
 
-	t.Run("positive tests", func(t *testing.T) {
-		err := Copy(src.Name(), dst.Name(), 0, 0)
-		require.Nil(t, err)
-		dstText, _ := io.ReadAll(dst)
-		require.Equal(t, []byte(""), dstText)
+	for name, test := range tests {
+		test := test
+		t.Run(name, func(t *testing.T) {
+			src.Truncate(0)
+			src.Seek(0, io.SeekStart)
+			src.WriteString(test.sourceString)
+			err := Copy(src.Name(), dst.Name(), test.offset, test.limit)
+			require.Nil(t, err)
+			dst.Seek(0, io.SeekStart)
+			dstText, _ := io.ReadAll(dst)
+			require.Equal(t, test.result, dstText)
+		})
+	}
 
-		src.WriteString("Hello World!")
-
-		err = Copy(src.Name(), dst.Name(), 0, 0)
-		require.Nil(t, err)
-		dstText, _ = io.ReadAll(dst)
-		require.Equal(t, []byte("Hello World!"), dstText)
-
-		err = Copy(src.Name(), dst.Name(), 6, 0)
-		require.Nil(t, err)
-		dst.Seek(0, io.SeekStart)
-		dstText, _ = io.ReadAll(dst)
-		require.Equal(t, []byte("World!"), dstText)
-
-		err = Copy(src.Name(), dst.Name(), 0, 5)
-		require.Nil(t, err)
-		dst.Seek(0, io.SeekStart)
-		dstText, _ = io.ReadAll(dst)
-		require.Equal(t, []byte("Hello"), dstText)
-
-		err = Copy(src.Name(), dst.Name(), 3, 5)
-		require.Nil(t, err)
-		dst.Seek(0, io.SeekStart)
-		dstText, _ = io.ReadAll(dst)
-		require.Equal(t, []byte("lo Wo"), dstText)
-
-		err = Copy(src.Name(), dst.Name(), 0, 1000)
-		require.Nil(t, err)
-		dst.Seek(0, io.SeekStart)
-		dstText, _ = io.ReadAll(dst)
-		require.Equal(t, []byte("Hello World!"), dstText)
-
-		err = Copy("/dev/urandom", dst.Name(), 0, 500)
+	t.Run("copy from /dev/urandom", func(t *testing.T) {
+		err := Copy("/dev/urandom", dst.Name(), 0, 500)
 		require.Nil(t, err)
 		dstStat, _ := dst.Stat()
 		require.Equal(t, int64(500), dstStat.Size())
