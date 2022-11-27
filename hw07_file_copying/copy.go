@@ -40,13 +40,11 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	} else {
 		srcReader = io.LimitReader(srcReader, limit)
 	}
-
-	barLimit := limit
 	if limit > srcSize-offset {
-		barLimit = srcSize - offset
+		limit = srcSize - offset
 	}
 
-	bar := pb.Full.Start64(barLimit)
+	bar := pb.Full.Start64(limit)
 	barReader := bar.NewProxyReader(srcReader)
 	if _, err := src.Seek(offset, io.SeekStart); err != nil {
 		return ErrUnsupportedFile
