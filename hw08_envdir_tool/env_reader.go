@@ -17,7 +17,6 @@ type EnvValue struct {
 
 func ReadFile(file string) (EnvValue, error) {
 	f, err := os.Open(file)
-	defer f.Close()
 	if err != nil {
 		return EnvValue{Value: "", NeedRemove: false}, err
 	}
@@ -32,6 +31,9 @@ func ReadFile(file string) (EnvValue, error) {
 	line, _ := br.ReadBytes('\n')
 	line = bytes.ReplaceAll(line, []byte{0}, []byte{'\n'})
 	line = bytes.TrimRight(line, " \n\t")
+	if err := f.Close(); err != nil {
+		return EnvValue{Value: "", NeedRemove: false}, err
+	}
 	return EnvValue{Value: string(line), NeedRemove: false}, nil
 }
 
